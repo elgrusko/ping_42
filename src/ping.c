@@ -19,6 +19,7 @@ void send_ping(int sock, t_env *env){
 	}
 	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv_out, sizeof tv_out);
 	while (loop){
+		// REPRENDRE ICI POUR GERER L'ENVOI ET LA RECEPTION DES REQUETES ICMP
 		printf("sending ping \n");
 	}
 	return ;
