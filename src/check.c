@@ -1,5 +1,19 @@
 #include "../includes/ft_ping.h"
 
+char *resolve_ip(char *addr_host, struct sockaddr_in *addr_con) // IP string vers IP decimale (utilisable), et hostname vers IP decimale
+{
+	struct hostent 	*host_entity;
+	char 			*ip;
+	
+	ip = (char*)malloc(sizeof(char) * 16);
+	if ((host_entity = gethostbyname(addr_host)) == NULL)
+		return NULL;
+	strcpy(ip, inet_ntoa(*(struct in_addr *)host_entity->h_addr));
+	(*addr_con).sin_family = host_entity->h_addrtype;
+	(*addr_con).sin_port = htons (PORT_NO);
+	(*addr_con).sin_addr.s_addr = *(long*)host_entity->h_addr;
+	return (ip);
+}
 
 int init_ping(t_env *env){
 	int sock;
