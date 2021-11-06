@@ -1,28 +1,32 @@
 #include "../includes/ft_ping.h"
 
-char *resolve_ip(char *addr_host, struct sockaddr_in *addr_con) // IP string vers IP decimale (utilisable), et hostname vers IP decimale
+int resolve_ip(char *addr_host, struct sockaddr_in *addr_con) // IP string vers IP decimale (utilisable), et hostname vers IP decimale
 {
 	struct hostent 	*host_entity;
-	char 			*ip;
 	
-	ip = (char*)malloc(sizeof(char) * 16);
 	if ((host_entity = gethostbyname(addr_host)) == NULL)
-		return NULL;
-	strcpy(ip, inet_ntoa(*(struct in_addr *)host_entity->h_addr));
+		return (-1);
 	(*addr_con).sin_family = host_entity->h_addrtype;
-	(*addr_con).sin_port = htons (PORT_NO);
+	(*addr_con).sin_port = htons(0);
 	(*addr_con).sin_addr.s_addr = *(long*)host_entity->h_addr;
-	return (ip);
+	return (0);
 }
 
-int init_ping(t_env *env){
-	int sock;
-
+int init_ping(t_env *env)
+{
+	int 	sock;
+	struct 	sockaddr_in addr_con;
+	
+	if (resolve_ip(env->addrstr, &addr_con) != 0)
+	{
+		printf("ft_ping: %s: unknown IP or hostname\n", env->addrstr);
+		exit(1);
+	}
 	printf("PING %s (%s) %d(%d) bytes of data.\n", env->dest, env->addrstr, env->s, env->s + 28);
 	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (sock < 0)
 		return (1);
-	send_ping(sock, env);
+	send_ping(sock, env, &addr_con);
 	return (0);
 }
 
