@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
+#include <sys/time.h>
 # include "libft.h"
 
 
@@ -31,6 +32,11 @@ typedef struct	s_env{
 	char *fqdn;
 }				t_env;
 
+typedef struct 	s_icmhdr{
+	struct icmphdr 	icmp_hdr;
+	time_t			timestamp;
+	unsigned char 	padding[48];
+}			   	t_icmphdr;
 
 int		lookup_dest(t_env *env);
 void 	send_ping(int sock, t_env *env, struct sockaddr_in *addr_con);
