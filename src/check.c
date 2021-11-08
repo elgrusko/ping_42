@@ -48,7 +48,7 @@ int		lookup_dest(t_env *env){
 	i = getaddrinfo(env->dest, NULL, &hints, &result);
 	if (i != 0){
 		printf("ping: %s: Name or service not known\n", env->dest);
-		return (1);
+		return (2);
 	}
 	for (res = result; res != NULL; res = res->ai_next){
 		inet_ntop(res->ai_family, res->ai_addr->sa_data, addrstr, 100);
