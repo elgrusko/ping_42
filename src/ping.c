@@ -21,6 +21,17 @@ unsigned short checksum(void *b, int len)
     return result;
 }
 
+void fill_icmp_hdr(t_icmphdr *icmp, t_env *env, u_int16_t pid, time_t timestamp)
+{
+    bzero(icmp, sizeof(t_icmphdr));
+	icmp->icmp_hdr.type = ICMP_ECHO;
+	icmp->icmp_hdr.un.echo.id = ((pid << 8) & 0xff00) | ((pid >> 8) & 0x00ff);
+	icmp->icmp_hdr.un.echo.sequence = env->i++;
+    icmp->icmp_hdr.un.echo.sequence = ((icmp->icmp_hdr.un.echo.sequence << 8) & 0xff00) | ((icmp->icmp_hdr.un.echo.sequence >> 8) & 0x00ff);
+	icmp->timestamp = timestamp;
+    icmp->icmp_hdr.checksum = checksum(icmp, sizeof(t_icmphdr));
+}
+
 void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
 {
 	(void)env;
@@ -30,33 +41,18 @@ void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
     u_int16_t       pid;
 
     pid = getpid();
-	tv_out.tv_sec = 1;
+    tv_out.tv_sec = 1;
     tv_out.tv_usec = 0;
 	signal(SIGINT, handler);
-	bzero(&icmp, sizeof(icmp));
-	icmp.icmp_hdr.type = ICMP_ECHO;
-	icmp.icmp_hdr.un.echo.id = getpid();
-	icmp.icmp_hdr.un.echo.sequence = env->i;
-	icmp.icmp_hdr.checksum = checksum(&icmp.icmp_hdr, sizeof(icmp.icmp_hdr));
-	if (gettimeofday(&tv_seq_start, NULL) == -1)
-		exit(42); // gerer erreur normalement
-    setsockopt(sock, SOL_IP, IP_TTL, &env->ttl, sizeof(env->ttl));
-    // setting timeout of recv setting
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv_out, sizeof tv_out);
+    setsockopt(sock, SOL_IP, IP_TTL, &env->ttl, sizeof(env->ttl));                  // set TTL 
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv_out, sizeof tv_out); // set timeout
     while (loop)
     {
-        bzero(&icmp.icmp_hdr, sizeof(icmp.icmp_hdr));
-        icmp.icmp_hdr.type = ICMP_ECHO;
-        icmp.icmp_hdr.un.echo.id = ((pid << 8) & 0xff00) | ((pid >> 8) & 0x00ff); // parce que le little endian vient en premier dans la trame (BE/LE)
-        icmp.icmp_hdr.un.echo.sequence = env->i++;
-        icmp.icmp_hdr.un.echo.sequence = ((icmp.icmp_hdr.un.echo.sequence << 8) & 0xff00) | ((icmp.icmp_hdr.un.echo.sequence >> 8) & 0x00ff); // parce que le little endian vient en premier dans la trame (BE/LE)
-		icmp.timestamp = tv_seq_start.tv_sec;
-        icmp.icmp_hdr.checksum = checksum(&icmp, sizeof(icmp));
-        //send packet
+        if (gettimeofday(&tv_seq_start, NULL) == -1)
+		exit(42); // gerer erreur normalement
+        fill_icmp_hdr(&icmp, env, pid, tv_seq_start.tv_sec);
         if (sendto(sock, &icmp, sizeof(icmp), 0, (struct sockaddr*)ping_addr, sizeof(*ping_addr)) <= 0)
-        {
-            printf("\nPacket Sending Failed!\n");
-        }
+        	printf("\nPacket Sending Failed!\n");
         printf("ICMP packet has been sent.");
         break;
     }
