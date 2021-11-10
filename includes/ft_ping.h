@@ -18,6 +18,7 @@
 #include <sys/time.h>
 # include "libft.h"
 
+#define PACKET_SIZE 84 // ip header (20 bytes) + icmp header (8 bytes) + data
 
 typedef struct	s_env{
 	int v;
@@ -25,6 +26,7 @@ typedef struct	s_env{
 	int s;
 	int i;
 	int ttl;
+	int interval;
 	char err;
 	char *dest;
 	char *addrstr;
@@ -38,8 +40,20 @@ typedef struct 	s_icmhdr{
 	unsigned char 	padding[48];
 }			   	t_icmphdr;
 
+typedef struct 	s_rcvhdr{
+	struct msghdr 	msg;
+	struct iovec 	iov[1];
+	unsigned char 	*buf;
+}			   	t_rcvhdr;
+
+typedef struct 	s_rcvmem{
+	struct ip 		ip_hdr;
+	struct icmphdr 	icmp_hdr;
+}				t_rcvmem;
+
 int		lookup_dest(t_env *env);
 void 	send_ping(int sock, t_env *env, struct sockaddr_in *addr_con);
 int		init_ping(t_env *env);
 int		reverse_lookup(t_env *env);
+void 	print_bytes(void *ptr, int size);
 # endif

@@ -39,6 +39,7 @@ void init_env(t_env *env){
 	env->h = 0;
 	env->s = 56;
 	env->i = 1;
+	env->interval = 1;
 	env->ttl = 64;
 	env->err = '\0';
 	env->dest = NULL;

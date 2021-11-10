@@ -1,5 +1,17 @@
 #include "../includes/ft_ping.h"
 
+void print_bytes(void *ptr, int size) // pour afficher le contenu d'une zone memoire (genre la trame)
+{
+    unsigned char *p = ptr;
+    int i;
+    for (i=0; i<size; i++) {
+        if (i > 1 && i % 16 == 0)
+            printf("\n");
+        printf("%02hhX ", p[i]);
+    }
+    printf("\n");
+}
+
 int resolve_ip(char *addr_host, struct sockaddr_in *addr_con) // IP string vers IP decimale (utilisable), et hostname vers IP decimale
 {
 	struct hostent 	*host_entity;
