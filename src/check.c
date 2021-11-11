@@ -28,13 +28,14 @@ int init_ping(t_env *env)
 {
 	int 	sock;
 	struct 	sockaddr_in addr_con;
-	
+
 	if (resolve_ip(env->addrstr, &addr_con) != 0)
 	{
 		printf("ft_ping: %s: unknown IP or hostname\n", env->addrstr);
 		exit(1);
 	}
 	printf("PING %s (%s) %d(%d) bytes of data.\n", env->dest, env->addrstr, env->s, env->s + 28);
+	reverse_dns_lookup(env);
 	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (sock < 0)
 		return (1);

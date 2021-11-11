@@ -29,6 +29,7 @@ typedef struct	s_env{
 	int interval;
 	char err;
 	char *dest;
+	char *rev_dns;
 	char *addrstr;
 	char *addrstr6;
 	char *fqdn;
@@ -56,4 +57,5 @@ void 	send_ping(int sock, t_env *env, struct sockaddr_in *addr_con);
 int		init_ping(t_env *env);
 int		reverse_lookup(t_env *env);
 void 	print_bytes(void *ptr, int size);
+void 	reverse_dns_lookup(t_env *env);
 # endif
