@@ -1,7 +1,8 @@
 #include "../includes/ft_ping.h"
 int loop = 1;
 
-void handler(){
+void handler()
+{
 	loop = 0;
 	return ;
 }
@@ -96,6 +97,22 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
     rcv_mem = (t_rcvmem*)(rcv_hdr.iov[0].iov_base);
 }
 
+void    wait_interval(int interval) // sleep() alternative
+{
+	struct timeval tv_current;
+	struct timeval tv_next;
+
+	if (gettimeofday(&tv_current, NULL) < 0)
+		exit(42); // gerer erreur
+	tv_next = tv_current;
+	tv_next.tv_sec += interval;
+	while (tv_current.tv_sec < tv_next.tv_sec || tv_current.tv_usec < tv_next.tv_usec)
+	{
+		if (gettimeofday(&tv_current, NULL) < 0)
+			exit(42); // gerer erreur
+	}
+}
+
 void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
 {
 	(void)env;
@@ -118,7 +135,8 @@ void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
         if (sendto(sock, &icmp, sizeof(icmp), 0, (struct sockaddr*)ping_addr, sizeof(*ping_addr)) <= 0)
         	printf("\nPacket Sending Failed!\n");
         recv_ping(sock, &icmp, tv_seq_start, env);
-        break;
+        wait_interval(env->interval);
     }
+    printf("END\n");
 	return ;
 }
