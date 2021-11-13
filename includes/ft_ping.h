@@ -27,6 +27,9 @@ typedef struct	s_env{
 	int i;
 	int ttl;
 	int interval;
+	int pckt_loss;
+	int pckt_recv;
+	char *av;
 	char err;
 	char *dest;
 	char *rev_dns;

@@ -19,10 +19,7 @@ void reverse_dns_lookup(t_env *env)
     len = sizeof(struct sockaddr_in);
   
     if (getnameinfo((struct sockaddr *)&temp_addr, len, buf, sizeof(buf), NULL, 0, NI_NAMEREQD)) 
-    {
-        printf("Could not resolve reverse lookup of hostname\n");
         return ;
-    }
     env->rev_dns = ft_strdup(buf);
 }
 
@@ -90,10 +87,13 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
     rcv_id = rcv_mem->icmp_hdr.un.echo.id;
     if (len && rcv_id == icmp_sent->icmp_hdr.un.echo.id) // on check que l'id du icmp reply est le meme que celui du icmp request
     {
+        env->pckt_recv += 1;
         gettimeofday(&tv_seq_end, NULL);
         tv_seq_diff = (double)(tv_seq_end.tv_sec - tv_seq_start.tv_sec) * 1000.0 + (double)(tv_seq_end.tv_usec - tv_seq_start.tv_usec) / 1000.0;
         printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%.2lf ms\n", PACKET_SIZE - 20, env->rev_dns, env->addrstr, env->i - 1, env->ttl, tv_seq_diff); 
     }
+    else
+        env->pckt_loss += 1;
     rcv_mem = (t_rcvmem*)(rcv_hdr.iov[0].iov_base);
 }
 
@@ -111,6 +111,17 @@ void    wait_interval(int interval) // sleep() alternative
 		if (gettimeofday(&tv_current, NULL) < 0)
 			exit(42); // gerer erreur
 	}
+}
+
+void print_stats(t_env *env)
+{
+    int loss_total;
+
+    loss_total = env->pckt_loss;
+    if (loss_total > 0)
+        loss_total = ((env->i - 1) / env->pckt_loss) * 100;
+    printf("--- %s ping statistics ---\n", env->av);
+    printf("%d packets transmitted, %d received, %d%% packet loss\n", env->i - 1, env->pckt_recv, loss_total);
 }
 
 void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
@@ -137,6 +148,6 @@ void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
         recv_ping(sock, &icmp, tv_seq_start, env);
         wait_interval(env->interval);
     }
-    printf("END\n");
+    print_stats(env);
 	return ;
 }

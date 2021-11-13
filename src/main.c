@@ -34,12 +34,16 @@ void	print_error(char c, int i){
 	return ;
 }
 
-void init_env(t_env *env){
+void init_env(t_env *env, char **av){
 	env->v = 0;
 	env->h = 0;
 	env->s = 56;
 	env->i = 1;
 	env->interval = 1;
+	env->pckt_loss = 0;
+	env->pckt_recv = 0;
+	env->rev_dns = NULL;
+	env->av = av[1];
 	env->ttl = 64;
 	env->err = '\0';
 	env->dest = NULL;
@@ -52,7 +56,7 @@ int  fill_env(t_env *env, char **av){
 	int i;
 	int y;
 
-	init_env(env);
+	init_env(env, av);
 	for (i = 1; av[i] != NULL; i++){
 		if (av[i][0] == '-'){
 			for (y = 1; av[i][y] != '\0'; y++){
