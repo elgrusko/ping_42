@@ -19,6 +19,7 @@
 # include "libft.h"
 
 #define PACKET_SIZE 84 // ip header (20 bytes) + icmp header (8 bytes) + data
+// PACKET_SIZE varie en fonction de l'option -s Donc pqs sur qu'on s'en serve vraiment
 
 typedef struct	s_env{
 	int v;
@@ -36,6 +37,11 @@ typedef struct	s_env{
 	char *addrstr;
 	char *addrstr6;
 	char *fqdn;
+	double min;
+	double max;
+	double avg;
+	double mdev;
+	int type[100];
 }				t_env;
 
 typedef struct 	s_icmhdr{

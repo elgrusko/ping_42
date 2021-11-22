@@ -29,7 +29,7 @@ void	print_error(char c, int i){
 	"dns name or ip address\n  -v                 "
 	"verbose output\n  -h                 print help and exit\n  -i <interval>"
 	"      seconds between sending each packets\n  -s <size>          use "
-	"<size> as number of data bytes to be sent\n\nFor "
+	"<size> as number of data bytes to be sent\n  -t <ttl>           define time to live\n\nFor "
 	"more details see ping(8)\n");
 	return ;
 }
@@ -50,6 +50,10 @@ void init_env(t_env *env, char **av){
 	env->addrstr = NULL;
 	env->addrstr6 = NULL;
 	env->fqdn = NULL;
+	env->min = 0;
+	env->max = 0;
+	env->avg = 0;
+	env->mdev = 0;
 }
 
 int  fill_env(t_env *env, char **av){
@@ -71,6 +75,17 @@ int  fill_env(t_env *env, char **av){
 					if (ft_strisdigit(av[i])){
 						av[i - 1][y] == 's' ? (env->s = ft_atoi(av[i])) :
 						(env->i = ft_atoi(av[i]));
+						break ;
+					}
+					else{
+					printf("ping: invalid argument: '%s'\n", av[i]);
+					return (2);
+					}
+				}
+				else if (av[i][y] == 't'){
+					i++;
+					if (ft_strisdigit(av[i])){
+						env->ttl = ft_atoi(av[i]);
 						break ;
 					}
 					else{

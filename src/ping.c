@@ -90,7 +90,12 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
         env->pckt_recv += 1;
         gettimeofday(&tv_seq_end, NULL);
         tv_seq_diff = (double)(tv_seq_end.tv_sec - tv_seq_start.tv_sec) * 1000.0 + (double)(tv_seq_end.tv_usec - tv_seq_start.tv_usec) / 1000.0;
-        printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%.2lf ms\n", PACKET_SIZE - 20, env->rev_dns, env->addrstr, env->i - 1, env->ttl, tv_seq_diff); 
+        // gere le rtt a la fin du ping (mdev a finir)
+        env->min = (env->min > tv_seq_diff || env->min == 0) ? tv_seq_diff : env->min;
+        env->max = (env->max < tv_seq_diff || env->max == 0) ? tv_seq_diff : env->max;
+        env->avg += tv_seq_diff;
+        env->rev_dns ? printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->rev_dns, env->addrstr, env->i - 1, env->ttl, tv_seq_diff) : 
+        printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->addrstr, env->i - 1, env->ttl, tv_seq_diff); // env->s + 8 (icmp header)
     }
     else
         env->pckt_loss += 1;
@@ -122,6 +127,7 @@ void print_stats(t_env *env)
         loss_total = ((env->i - 1) / env->pckt_loss) * 100;
     printf("--- %s ping statistics ---\n", env->av);
     printf("%d packets transmitted, %d received, %d%% packet loss\n", env->i - 1, env->pckt_recv, loss_total);
+    printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", env->min, env->avg / (env->pckt_recv - env->pckt_loss), env->max, env->mdev);
 }
 
 void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
@@ -138,10 +144,11 @@ void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
 	signal(SIGINT, handler);
     setsockopt(sock, SOL_IP, IP_TTL, &env->ttl, sizeof(env->ttl));                  // set TTL 
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv_out, sizeof tv_out); // set timeout
-    while (loop)
-    {
-        if (gettimeofday(&tv_seq_start, NULL) == -1)
-		    exit(42); // gerer erreur normalement
+    while (loop){
+        if (gettimeofday(&tv_seq_start, NULL) == -1){
+            printf("problem time of day function\n");
+            exit(42); // gerer erreur normalement
+        }
         fill_icmp_hdr(&icmp, env, pid, tv_seq_start.tv_sec);
         if (sendto(sock, &icmp, sizeof(icmp), 0, (struct sockaddr*)ping_addr, sizeof(*ping_addr)) <= 0)
         	printf("\nPacket Sending Failed!\n");
