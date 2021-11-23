@@ -40,6 +40,7 @@ typedef struct	s_env{
 	double min;
 	double max;
 	double avg;
+	double *list;
 	double mdev;
 	struct timeval  begin;
 

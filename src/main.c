@@ -16,6 +16,8 @@ void free_env(t_env env){
 		free(env.addrstr6);
 	if (env.fqdn)
 		free(env.fqdn);
+	if (env.list)
+		free(env.list);
 	return ;
 }
 
@@ -58,6 +60,7 @@ void init_env(t_env *env, char **av){
 	env->addrstr = NULL;
 	env->addrstr6 = NULL;
 	env->fqdn = NULL;
+	env->list = NULL;
 	env->min = 0;
 	env->max = 0;
 	env->avg = 0;

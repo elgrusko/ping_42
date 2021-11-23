@@ -1,10 +1,26 @@
 #include "../includes/ft_ping.h"
+
 int loop = 1;
 
 void handler()
 {
 	loop = 0;
 	return ;
+}
+
+double  calcul_mdev(t_env *env){
+    double type;
+    double square;
+    int i;
+    type = 0;
+
+    for (i = 0; i < env->pckt_recv; i++){
+        square = (env->list[i] - env->avg);
+        square = square * square;
+        type += square;
+    }
+    type = type / i;
+    return type;
 }
 
 // Resolves the reverse lookup of the hostname
@@ -91,7 +107,12 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
         env->pckt_recv += 1;
         gettimeofday(&tv_seq_end, NULL);
         tv_seq_diff = (double)(tv_seq_end.tv_sec - tv_seq_start.tv_sec) * 1000.0 + (double)(tv_seq_end.tv_usec - tv_seq_start.tv_usec) / 1000.0;
-        // gere le rtt a la fin du ping (mdev a finir)
+        // gere le rtt a la fin du ping (mdev a finir) --> realloc de double *list a chaque fois pour integrer les valeurs de tv_seq_diff
+        if (!(env->list))
+            env->list = malloc(sizeof(double));
+        else
+            env->list = realloc(env->list, (sizeof(double) * env->pckt_recv));
+        env->list[env->pckt_recv - 1] = tv_seq_diff;
         env->min = (env->min > tv_seq_diff || env->min == 0) ? tv_seq_diff : env->min;
         env->max = (env->max < tv_seq_diff || env->max == 0) ? tv_seq_diff : env->max;
         env->avg += tv_seq_diff;
@@ -133,7 +154,9 @@ void print_stats(t_env *env)
     gettimeofday(&tv, NULL);
     spent_time = ((double)(tv.tv_usec - env->begin.tv_usec) / 1000000 +(double)(tv.tv_sec - env->begin.tv_sec)) * 1000;
     printf("%d packets transmitted, %d received, %d%% packet loss, time %.fms\n", env->i - 1, env->pckt_recv, loss_total, spent_time);
-    printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", env->min, env->avg / (env->pckt_recv - env->pckt_loss), env->max, env->mdev);
+    env->avg = env->avg / (env->pckt_recv - env->pckt_loss);
+    env->mdev = calcul_mdev(env);
+    printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", env->min, env->avg, env->max, env->mdev);
 }
 
 void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
