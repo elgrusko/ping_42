@@ -41,7 +41,8 @@ typedef struct	s_env{
 	double max;
 	double avg;
 	double mdev;
-	int type[100];
+	struct timeval  begin;
+
 }				t_env;
 
 typedef struct 	s_icmhdr{
@@ -67,4 +68,6 @@ int		init_ping(t_env *env);
 int		reverse_lookup(t_env *env);
 void 	print_bytes(void *ptr, int size);
 void 	reverse_dns_lookup(t_env *env);
+void 	free_rcv(t_rcvhdr rcv_hdr);
+
 # endif

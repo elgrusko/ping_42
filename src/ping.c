@@ -80,8 +80,9 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
     len = recvmsg(sock, &rcv_hdr.msg, flags);
     if (!len)
     {
-        printf("error"); // gerer normalement l'erreur
-        exit(42);
+        free_rcv(rcv_hdr);
+        printf("error len\n"); // gerer normalement l'erreur // Ligne a supprimer ?
+        return ;
     }
     rcv_mem = (t_rcvmem*)(rcv_hdr.iov[0].iov_base); // caster le reply dans une structure ip header + icmp header. plus facile pour acceder aux elements
     rcv_id = rcv_mem->icmp_hdr.un.echo.id;
@@ -100,6 +101,7 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
     else
         env->pckt_loss += 1;
     rcv_mem = (t_rcvmem*)(rcv_hdr.iov[0].iov_base);
+    free_rcv(rcv_hdr);
 }
 
 void    wait_interval(int interval) // sleep() alternative
@@ -108,25 +110,29 @@ void    wait_interval(int interval) // sleep() alternative
 	struct timeval tv_next;
 
 	if (gettimeofday(&tv_current, NULL) < 0)
-		exit(42); // gerer erreur
+		return ; // gerer erreur exit(42)
 	tv_next = tv_current;
 	tv_next.tv_sec += interval;
 	while (tv_current.tv_sec < tv_next.tv_sec || tv_current.tv_usec < tv_next.tv_usec)
 	{
 		if (gettimeofday(&tv_current, NULL) < 0)
-			exit(42); // gerer erreur
+			return ; // gerer erreur exit(42)
 	}
 }
 
 void print_stats(t_env *env)
 {
     int loss_total;
+    struct timeval tv;
+    double spent_time;
 
     loss_total = env->pckt_loss;
     if (loss_total > 0)
         loss_total = ((env->i - 1) / env->pckt_loss) * 100;
     printf("--- %s ping statistics ---\n", env->av);
-    printf("%d packets transmitted, %d received, %d%% packet loss\n", env->i - 1, env->pckt_recv, loss_total);
+    gettimeofday(&tv, NULL);
+    spent_time = ((double)(tv.tv_usec - env->begin.tv_usec) / 1000000 +(double)(tv.tv_sec - env->begin.tv_sec)) * 1000;
+    printf("%d packets transmitted, %d received, %d%% packet loss, time %.fms\n", env->i - 1, env->pckt_recv, loss_total, spent_time);
     printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", env->min, env->avg / (env->pckt_recv - env->pckt_loss), env->max, env->mdev);
 }
 
@@ -145,9 +151,9 @@ void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
     setsockopt(sock, SOL_IP, IP_TTL, &env->ttl, sizeof(env->ttl));                  // set TTL 
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv_out, sizeof tv_out); // set timeout
     while (loop){
-        if (gettimeofday(&tv_seq_start, NULL) == -1){
+        if (gettimeofday(&tv_seq_start, NULL) == -1){ // on sort de la fonction ? Pas de probleme avec un return ; tout est free apres
             printf("problem time of day function\n");
-            exit(42); // gerer erreur normalement
+            return ; // gerer erreur normalement
         }
         fill_icmp_hdr(&icmp, env, pid, tv_seq_start.tv_sec);
         if (sendto(sock, &icmp, sizeof(icmp), 0, (struct sockaddr*)ping_addr, sizeof(*ping_addr)) <= 0)

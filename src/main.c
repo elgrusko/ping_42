@@ -1,5 +1,12 @@
 #include "../includes/ft_ping.h"
 
+void free_rcv(t_rcvhdr rcv_hdr){
+	if (rcv_hdr.buf)
+		free(rcv_hdr.buf);
+
+	return ;
+}
+
 void free_env(t_env env){
 	if (env.dest)
 		free(env.dest);
@@ -35,6 +42,7 @@ void	print_error(char c, int i){
 }
 
 void init_env(t_env *env, char **av){
+
 	env->v = 0;
 	env->h = 0;
 	env->s = 56;
@@ -54,6 +62,7 @@ void init_env(t_env *env, char **av){
 	env->max = 0;
 	env->avg = 0;
 	env->mdev = 0;
+	gettimeofday(&env->begin, NULL);
 }
 
 int  fill_env(t_env *env, char **av){

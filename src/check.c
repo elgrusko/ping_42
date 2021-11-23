@@ -40,6 +40,8 @@ int init_ping(t_env *env)
 	if (sock < 0)
 		return (1);
 	send_ping(sock, env, &addr_con);
+	// Ici la struct rcv_hdr sera free dans tous les cas et la struct
+	// sera free dans le main au retour de la fonction init_ping
 	return (0);
 }
 
