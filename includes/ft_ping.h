@@ -28,12 +28,12 @@ typedef struct	s_env{
 	int s;
 	int i;
 	int q;
+	int n;
 	int ttl;
 	int interval;
 	int pckt_loss;
 	int pckt_recv;
 	int nb_errors;
-	char *av;
 	char err;
 	char *dest;
 	char *rev_dns;

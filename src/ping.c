@@ -116,7 +116,7 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
         env->max = (env->max < tv_seq_diff || env->max == 0) ? tv_seq_diff : env->max;
         env->avg += tv_seq_diff;
         if (!env->q)
-            env->rev_dns ? printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->rev_dns, env->addrstr, env->i - 1, env->ttl, tv_seq_diff) : 
+            (env->rev_dns && !env->n) ? printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->rev_dns, env->addrstr, env->i - 1, env->ttl, tv_seq_diff) : 
             printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->addrstr, env->i - 1, env->ttl, tv_seq_diff); // env->s + 8 (icmp header)
     }
     else

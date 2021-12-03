@@ -35,26 +35,26 @@ void	print_error(char c, int i){
 		printf("ping: invalid option -- '%c'\n", c);
 	printf("\nUsage\n  ping [options] "
 	"<destination>\n\nOptions:\n  <destination>      "
-	"dns name or ip address\n  -v                 "
-	"verbose output\n  -h                 print help and exit\n  -i <interval>"
-	"      seconds between sending each packets\n  -q                 quiet output\n  -s <size>          use "
-	"<size> as number of data bytes to be sent\n  -t <ttl>           define time to live\n\nFor "
+	"dns name or ip address\n  \n  -h                 print help and exit\n  -i <interval>"
+	"      seconds between sending each packets\n  -n                 no dns name resolution\n  -q                 quiet output\n  -s <size>          use "
+	"<size> as number of data bytes to be sent\n  -t <ttl>           define time to live\n  -v                 "
+	"verbose output\n\nFor "
 	"more details see ping(8)\n");
 	return ;
 }
 
-void init_env(t_env *env, char **av){
+void init_env(t_env *env){
 
 	env->v = 0;
 	env->h = 0;
 	env->s = 56;
 	env->i = 1;
 	env->q = 0;
+	env->n = 0;
 	env->interval = 1;
 	env->pckt_loss = 0;
 	env->pckt_recv = 0;
 	env->rev_dns = NULL;
-	env->av = av[1];
 	env->ttl = 64;
 	env->err = '\0';
 	env->dest = NULL;
@@ -73,8 +73,9 @@ int  fill_env(t_env *env, char **av){
 	int i;
 	int y;
 
-	init_env(env, av);
+	init_env(env);
 	for (i = 1; av[i] != NULL; i++){
+		printf("i = %d\n", i);
 		if (av[i][0] == '-'){
 			for (y = 1; av[i][y] != '\0'; y++){
 				if (av[i][y] == 'v')
@@ -83,8 +84,8 @@ int  fill_env(t_env *env, char **av){
 					env->h = 1;
 					return (1);
 				}
-				else if (av[i][y] == 'q'){
-					env->q = 1;
+				else if (av[i][y] == 'q' || av[i][y] == 'n'){
+					av[i][y] == 'q' ? (env->q = 1) : (env->n = 1);
 					break ;
 				}
 				else if (av[i][y] == 's' || av[i][y] == 'i'){
