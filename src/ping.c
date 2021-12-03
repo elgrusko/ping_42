@@ -115,8 +115,9 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
         env->min = (env->min > tv_seq_diff || env->min == 0) ? tv_seq_diff : env->min;
         env->max = (env->max < tv_seq_diff || env->max == 0) ? tv_seq_diff : env->max;
         env->avg += tv_seq_diff;
-        env->rev_dns ? printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->rev_dns, env->addrstr, env->i - 1, env->ttl, tv_seq_diff) : 
-        printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->addrstr, env->i - 1, env->ttl, tv_seq_diff); // env->s + 8 (icmp header)
+        if (!env->q)
+            env->rev_dns ? printf("%d bytes from %s (%s): icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->rev_dns, env->addrstr, env->i - 1, env->ttl, tv_seq_diff) : 
+            printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3lf ms\n", env->s + 8, env->addrstr, env->i - 1, env->ttl, tv_seq_diff); // env->s + 8 (icmp header)
     }
     else
         env->pckt_loss += 1;
@@ -149,7 +150,7 @@ void print_stats(t_env *env)
     loss_total = env->pckt_loss;
     if (loss_total > 0)
         loss_total = ((env->i - 1) / env->pckt_loss) * 100;
-    printf("--- %s ping statistics ---\n", env->av);
+    printf("--- %s ping statistics ---\n", env->dest);
     gettimeofday(&tv, NULL);
     spent_time = ((double)(tv.tv_usec - env->begin.tv_usec) / 1000000 +(double)(tv.tv_sec - env->begin.tv_sec)) * 1000;
     if (env->nb_errors)

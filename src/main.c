@@ -37,7 +37,7 @@ void	print_error(char c, int i){
 	"<destination>\n\nOptions:\n  <destination>      "
 	"dns name or ip address\n  -v                 "
 	"verbose output\n  -h                 print help and exit\n  -i <interval>"
-	"      seconds between sending each packets\n  -s <size>          use "
+	"      seconds between sending each packets\n  -q                 quiet output\n  -s <size>          use "
 	"<size> as number of data bytes to be sent\n  -t <ttl>           define time to live\n\nFor "
 	"more details see ping(8)\n");
 	return ;
@@ -49,6 +49,7 @@ void init_env(t_env *env, char **av){
 	env->h = 0;
 	env->s = 56;
 	env->i = 1;
+	env->q = 0;
 	env->interval = 1;
 	env->pckt_loss = 0;
 	env->pckt_recv = 0;
@@ -81,6 +82,10 @@ int  fill_env(t_env *env, char **av){
 				else if (av[i][y] == 'h'){
 					env->h = 1;
 					return (1);
+				}
+				else if (av[i][y] == 'q'){
+					env->q = 1;
+					break ;
 				}
 				else if (av[i][y] == 's' || av[i][y] == 'i'){
 					i++;

@@ -27,6 +27,7 @@ typedef struct	s_env{
 	int h;
 	int s;
 	int i;
+	int q;
 	int ttl;
 	int interval;
 	int pckt_loss;
