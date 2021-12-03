@@ -14,6 +14,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <errno.h>
 #include <time.h>
 #include <sys/time.h>
 # include "libft.h"
@@ -30,6 +31,7 @@ typedef struct	s_env{
 	int interval;
 	int pckt_loss;
 	int pckt_recv;
+	int nb_errors;
 	char *av;
 	char err;
 	char *dest;

@@ -97,7 +97,6 @@ void recv_ping(int sock, t_icmphdr *icmp_sent, struct timeval tv_seq_start, t_en
     if (!len)
     {
         free_rcv(rcv_hdr);
-        printf("error len\n"); // gerer normalement l'erreur // Ligne a supprimer ?
         return ;
     }
     rcv_mem = (t_rcvmem*)(rcv_hdr.iov[0].iov_base); // caster le reply dans une structure ip header + icmp header. plus facile pour acceder aux elements
@@ -153,10 +152,14 @@ void print_stats(t_env *env)
     printf("--- %s ping statistics ---\n", env->av);
     gettimeofday(&tv, NULL);
     spent_time = ((double)(tv.tv_usec - env->begin.tv_usec) / 1000000 +(double)(tv.tv_sec - env->begin.tv_sec)) * 1000;
-    printf("%d packets transmitted, %d received, %d%% packet loss, time %.fms\n", env->i - 1, env->pckt_recv, loss_total, spent_time);
+    if (env->nb_errors)
+        printf("%d packets transmitted, %d received, +%d errors, %d%% packet loss, time %.fms\n", env->i - 1, env->pckt_recv, env->nb_errors, loss_total, spent_time);
+    else
+        printf("%d packets transmitted, %d received, %d%% packet loss, time %.fms\n", env->i - 1, env->pckt_recv, loss_total, spent_time);
     env->avg = env->avg / (env->pckt_recv - env->pckt_loss);
     env->mdev = calcul_mdev(env);
-    printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", env->min, env->avg, env->max, env->mdev);
+    if (!env->nb_errors)
+        printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", env->min, env->avg, env->max, env->mdev);
 }
 
 void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
@@ -175,12 +178,16 @@ void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv_out, sizeof tv_out); // set timeout
     while (loop){
         if (gettimeofday(&tv_seq_start, NULL) == -1){ // on sort de la fonction ? Pas de probleme avec un return ; tout est free apres
-            printf("problem time of day function\n");
             return ; // gerer erreur normalement
         }
         fill_icmp_hdr(&icmp, env, pid, tv_seq_start.tv_sec);
         if (sendto(sock, &icmp, sizeof(icmp), 0, (struct sockaddr*)ping_addr, sizeof(*ping_addr)) <= 0)
         	printf("\nPacket Sending Failed!\n");
+        if (errno == 11)
+        {
+            printf("From %s icmp_seq=%d Destination Host Unreachable\n", env->addrstr, env->i);
+            env->nb_errors++;
+        }
         recv_ping(sock, &icmp, tv_seq_start, env);
         wait_interval(env->interval);
     }
