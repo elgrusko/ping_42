@@ -60,7 +60,10 @@ unsigned short checksum(void *b, int len)
 
 void fill_icmp_hdr(t_icmphdr *icmp, t_env *env, u_int16_t pid, time_t timestamp)
 {
+    printf("env->s = %d\n", env->s);
+    icmp->padding = (unsigned char*)malloc(sizeof(unsigned char) * env->s - 8);
     bzero(icmp, sizeof(t_icmphdr));
+    // REPRENDRE POUR L'OPTION S OU REMETTRE LE PADDING EN PADDING[] DNAS LE .H LE PADDING FAIT TOUJOURS 8 EN SIZE
 	icmp->icmp_hdr.type = ICMP_ECHO;
 	icmp->icmp_hdr.un.echo.id = ((pid << 8) & 0xff00) | ((pid >> 8) & 0x00ff);
 	icmp->icmp_hdr.un.echo.sequence = env->i++;

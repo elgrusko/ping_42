@@ -49,10 +49,10 @@ typedef struct	s_env{
 
 }				t_env;
 
-typedef struct 	s_icmhdr{
+typedef struct 	s_icmphdr{
 	struct icmphdr 	icmp_hdr;
 	time_t			timestamp;
-	unsigned char 	padding[48];
+	unsigned char 	*padding;
 }			   	t_icmphdr;
 
 typedef struct 	s_rcvhdr{
