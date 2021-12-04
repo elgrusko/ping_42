@@ -20,7 +20,7 @@
 # include "libft.h"
 
 #define PACKET_SIZE 84 // ip header (20 bytes) + icmp header (8 bytes) + data
-// PACKET_SIZE varie en fonction de l'option -s Donc pqs sur qu'on s'en serve vraiment
+// PACKET_SIZE varie en fonction de l'option -s Donc pas sur qu'on s'en serve vraiment
 
 typedef struct	s_env{
 	int v;
@@ -52,7 +52,7 @@ typedef struct	s_env{
 typedef struct 	s_icmphdr{
 	struct icmphdr 	icmp_hdr;
 	time_t			timestamp;
-	unsigned char 	*padding;
+	unsigned char 	padding[48];
 }			   	t_icmphdr;
 
 typedef struct 	s_rcvhdr{

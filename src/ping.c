@@ -60,8 +60,6 @@ unsigned short checksum(void *b, int len)
 
 void fill_icmp_hdr(t_icmphdr *icmp, t_env *env, u_int16_t pid, time_t timestamp)
 {
-    printf("env->s = %d\n", env->s);
-    icmp->padding = (unsigned char*)malloc(sizeof(unsigned char) * env->s - 8);
     bzero(icmp, sizeof(t_icmphdr));
     // REPRENDRE POUR L'OPTION S OU REMETTRE LE PADDING EN PADDING[] DNAS LE .H LE PADDING FAIT TOUJOURS 8 EN SIZE
 	icmp->icmp_hdr.type = ICMP_ECHO;
@@ -133,11 +131,12 @@ void    wait_interval(int interval) // sleep() alternative
 	struct timeval tv_current;
 	struct timeval tv_next;
 
+    signal(SIGINT, handler);
 	if (gettimeofday(&tv_current, NULL) < 0)
 		return ; // gerer erreur exit(42)
 	tv_next = tv_current;
 	tv_next.tv_sec += interval;
-	while (tv_current.tv_sec < tv_next.tv_sec || tv_current.tv_usec < tv_next.tv_usec)
+	while ((tv_current.tv_sec < tv_next.tv_sec || tv_current.tv_usec < tv_next.tv_usec) && loop)
 	{
 		if (gettimeofday(&tv_current, NULL) < 0)
 			return ; // gerer erreur exit(42)
