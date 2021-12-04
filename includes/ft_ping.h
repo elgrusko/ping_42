@@ -25,6 +25,7 @@
 typedef struct	s_env{
 	int v;
 	int h;
+	int c;
 	int s;
 	int i;
 	int q;

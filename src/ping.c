@@ -167,7 +167,6 @@ void print_stats(t_env *env)
 
 void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
 {
-	(void)env;
 	struct timeval 	tv_out;
 	t_icmphdr 		icmp;
 	struct timeval 	tv_seq_start;
@@ -192,6 +191,8 @@ void send_ping(int sock, t_env *env, struct sockaddr_in *ping_addr)
             env->nb_errors++;
         }
         recv_ping(sock, &icmp, tv_seq_start, env);
+        if (env->c && env->c == env->pckt_recv)
+            break ;
         wait_interval(env->interval);
     }
     print_stats(env);

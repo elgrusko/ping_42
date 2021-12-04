@@ -35,9 +35,8 @@ void	print_error(char c, int i){
 		printf("ping: invalid option -- '%c'\n", c);
 	printf("\nUsage\n  ping [options] "
 	"<destination>\n\nOptions:\n  <destination>      "
-	"dns name or ip address\n  \n  -h                 print help and exit\n  -i <interval>"
-	"      seconds between sending each packets\n  -n                 no dns name resolution\n  -q                 quiet output\n  -s <size>          use "
-	"<size> as number of data bytes to be sent\n  -t <ttl>           define time to live\n  -v                 "
+	"dns name or ip address\n  -c <count>         stop after <count> replies\n  -h                 print help and exit\n  -i <interval>"
+	"      seconds between sending each packets\n  -n                 no dns name resolution\n  -q                 quiet output\n  -t <ttl>           define time to live\n  -v                 "
 	"verbose output\n\nFor "
 	"more details see ping(8)\n");
 	return ;
@@ -47,6 +46,7 @@ void init_env(t_env *env){
 
 	env->v = 0;
 	env->h = 0;
+	env->c = 0;
 	env->s = 56;
 	env->i = 1;
 	env->q = 0;
@@ -87,10 +87,10 @@ int  fill_env(t_env *env, char **av){
 					av[i][y] == 'q' ? (env->q = 1) : (env->n = 1);
 					break ;
 				}
-				else if (av[i][y] == 's' || av[i][y] == 'i'){
+				else if (av[i][y] == 'c' || av[i][y] == 'i'){
 					i++;
 					if (ft_strisdigit(av[i])){
-						av[i - 1][y] == 's' ? (env->s = ft_atoi(av[i])) :
+						av[i - 1][y] == 'c' ? (env->c = ft_atoi(av[i])) :
 						(env->interval = ft_atoi(av[i]));
 						break ;
 					}
@@ -140,6 +140,7 @@ int		main(int ac, char **av){
 		return (EXIT_FAILURE);
 	}
 	else{
+		printf("env->c - %d\n", env.c);
 		if (env.dest == NULL || ac == 1){
 			printf("ping: usage error: Destination address required\n");
 			free_env(env);
