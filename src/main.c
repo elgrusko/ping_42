@@ -66,6 +66,7 @@ void init_env(t_env *env){
 	env->max = 0;
 	env->avg = 0;
 	env->mdev = 0;
+	env->nb_errors = 0;
 	gettimeofday(&env->begin, NULL);
 }
 
@@ -140,7 +141,6 @@ int		main(int ac, char **av){
 		return (EXIT_FAILURE);
 	}
 	else{
-		printf("env->c - %d\n", env.c);
 		if (env.dest == NULL || ac == 1){
 			printf("ping: usage error: Destination address required\n");
 			free_env(env);
