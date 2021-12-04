@@ -75,7 +75,6 @@ int  fill_env(t_env *env, char **av){
 
 	init_env(env);
 	for (i = 1; av[i] != NULL; i++){
-		printf("i = %d\n", i);
 		if (av[i][0] == '-'){
 			for (y = 1; av[i][y] != '\0'; y++){
 				if (av[i][y] == 'v')
@@ -92,7 +91,7 @@ int  fill_env(t_env *env, char **av){
 					i++;
 					if (ft_strisdigit(av[i])){
 						av[i - 1][y] == 's' ? (env->s = ft_atoi(av[i])) :
-						(env->i = ft_atoi(av[i]));
+						(env->interval = ft_atoi(av[i]));
 						break ;
 					}
 					else{
